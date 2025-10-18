@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <iostream>
 #include <map>
+#include <stack>
 
 namespace MyStl
 {
@@ -29,10 +30,7 @@ public:
     private:
     };
 
-    void insert(value_type& pair)
-    {
-        root = insert_helper(root, pair);
-    }
+    
     
 private:
     struct Node
@@ -43,7 +41,170 @@ private:
         Node(const value_type& pair) : data(pair), left(nullptr), right(nullptr){};
     };
 
-    Node* insert_helper(Node* node, value_type& pair)
+    
+    
+public:
+    Node* root;
+    int _size;
+    
+protected:
+
+public:
+    Map() : root(nullptr), _size(0){} // default constructor
+    Map(value_type val)
+    {
+        insert(val);
+    } // value constructor
+    Map(const Map& other)
+    {
+        clear();
+        std::stack<Node*> stack;
+        stack.push(root);
+        while (!stack.empty())
+        {
+            Node* _node = stack.top(); // we take the element in top
+            stack.pop(); // we remove it from the stack
+
+            // Post-order traversal
+            if (_node->left != nullptr)
+                stack.push(_node->left);
+            if (_node->right != nullptr)
+                stack.push(_node->right);
+            insert(_node->data);
+        }
+    }    // Copy constructor
+    Map& operator=(const Map& other)
+    {
+        if (this != &other)
+        {
+            clear();
+            std::stack<Node*> stack;
+            stack.push(root);
+            while (!stack.empty())
+            {
+                Node* _node = stack.top(); // we take the element in top
+                stack.pop(); // we remove it from the stack
+
+                // Post-order traversal
+                if (_node->left != nullptr)
+                    stack.push(_node->left);
+                if (_node->right != nullptr)
+                    stack.push(_node->right);
+                insert(_node->data);
+            }
+        }
+        return *this;
+    }   // Copy assignment
+    Map(Map&& other) noexcept
+    {
+        clear();
+        std::stack<Node*> stack;
+        stack.push(root);
+        while (!stack.empty())
+        {
+            Node* _node = stack.top(); // we take the element in top
+            stack.pop(); // we remove it from the stack
+
+            // Post-order traversal
+            if (_node->left != nullptr)
+                stack.push(_node->left);
+            if (_node->right != nullptr)
+                stack.push(_node->right);
+            insert(_node->data);
+        }
+        other.clear();
+        other.root = nullptr;
+    }   // Move constructor
+    Map& operator=(Map&& other) noexcept
+    {
+        if (this != &other)
+        {
+            clear();
+            std::stack<Node*> stack;
+            stack.push(root);
+            while (!stack.empty())
+            {
+                Node* _node = stack.top(); // we take the element in top
+                stack.pop(); // we remove it from the stack
+
+                // Post-order traversal
+                if (_node->left != nullptr)
+                    stack.push(_node->left);
+                if (_node->right != nullptr)
+                    stack.push(_node->right);
+                insert(_node->data);
+            }
+        }
+        other.clear();
+        other.root = nullptr;
+        return *this;
+    }    // Move assignment
+    ~Map()
+    {
+        clear();
+        delete root;
+        root = nullptr;
+    } //destructor
+
+    // Utils //
+    value_type find(const K key)
+    {
+        Node* elem = find_helper(root, key);
+        if (!elem)
+        {
+            std::cout << key << " not found" << std::endl;
+            return std::pair<const K, T>(K(), T());
+        }
+        return elem->data;
+    }
+    T& at(const K& key)
+    {
+        Node* elem = find_helper(root, key);
+        if (!elem)
+        {
+            std::_Throw_range_error("Not find the key in the map");
+        }
+        return elem->data.second;
+    }
+    const T& at(const K& key) const
+    {
+        Node* elem = find_helper(root, key);
+        if (!elem)
+        {
+            std::_Throw_range_error("Not find the key [" << key << "] in the map" << std::endl);
+        }
+        return elem->data.second;
+    }
+    void clear()
+    {
+        clear_helper(root);
+        _size = 0; // questo potrebbe non funzionare, da qualche parte nullo qualcosa
+    }
+    int size() const { return _size; }
+    bool empty() const { if (root == nullptr) return true; else return false;}
+
+    // modifiers //
+    void erase(const K& key);
+    iterator erase(iterator pos);
+    T& operator[](const K& key)
+{
+        Node* found = find_helper(root, key);
+        if (!found)
+        {
+            value_type pair(key, T());
+            insert(pair);
+            found = find_helper(root, key);
+        }
+        return found->data.second;
+}
+    void insert(const value_type& pair)
+    {
+        root = insert_helper(root, pair);
+    }
+
+
+private:
+    Node* insert_helper(Node* node, const value_type& pair)
     {
         if (node == nullptr)
         {
@@ -66,42 +227,50 @@ private:
     }
     Node* find_helper(Node* node, const K key)
     {
-        // find the key recursivly
+        if (node == nullptr)
+            return nullptr;
+    
+        if (key < node->data.first)
+            return find_helper(node->left, key);
+        else if (key > node->data.first)
+            return find_helper(node->right, key);
+        else
+            return node;
     }
-    
-public:
-    Node* root;
-    int _size;
-    
-protected:
-
-
-
-
-public:
-    Map() : root(nullptr), _size(0){} // default constructor
-    Map(value_type val)
+    void clear_helper(Node* node)
     {
-        insert(val);
-    } // value constructor
-    
+        if (node == nullptr)
+            return;
+        
+        // Post-order traversal
+        if (node->left != nullptr)
+            clear_helper(node->left);
+        if (node->right != nullptr)
+            clear_helper(node->right);
 
-    
-    T operator [](K key)
+        delete node;
+    }
+    void clear_helper_with_stack()
     {
-        T elem;
-        Node* node = find_helper(root, key);
-        if (node)
+        if (root == nullptr)
+            return;
+        
+        std::stack<Node*> stack;
+        stack.push(root);
+        while (!stack.empty())
         {
-            elem = node->data;
+            Node* _node = stack.top(); // we take the element in top
+            stack.pop(); // we remove it from the stack
+
+            // Post-order traversal
+            if (_node->left != nullptr)
+                stack.push(_node->left);
+            if (_node->right != nullptr)
+                stack.push(_node->right);
+            delete _node;
         }
-        return elem;
-    } 
-
-protected:
-
-
-private:
+        
+    }
     
 };
 
