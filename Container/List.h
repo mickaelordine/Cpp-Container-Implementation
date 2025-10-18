@@ -2,12 +2,9 @@
 #include <ostream>
 
 /*  
- *  
- *  
- *  
+ *  implementation of a double linked list to implement a stl list.
+ *  I use a sentinel node as pivot where all others node come with a circular dependency from that and other nodes.
  */
-
-
 
 namespace MyStl
 {
@@ -28,17 +25,36 @@ namespace MyStl
         
     };
 
-    template<typename T>
-    class ListIterator
-    {
-        
-    };
+    
     
     template<typename T>
     class List
     {
         // MEMBERS VARIABLES //
     public:
+        // class ListIterator
+        // {
+        //     ListIterator operator ++()
+        //     {
+        //     
+        //     }
+        //     ListIterator operator --()
+        //     {
+        //     
+        //     }
+        //     ListIterator operator ++(int)
+        //     {
+        //     
+        //     }
+        //     ListIterator operator --(int)
+        //     {
+        //     
+        //     }
+        //     List& operator *()
+        //     {
+        //     
+        //     }
+        // };
         
     protected:
         
@@ -106,8 +122,8 @@ namespace MyStl
         inline bool empty() const { return m_size == 0; }
 
         // ===== ITERATORS =====
-        ListIterator<T> begin() { return ListIterator<T> (); }
-        ListIterator<T> end() { return ListIterator<T> (); }
+        //ListIterator<T> begin() { return ListIterator<T> (); }
+        //ListIterator<T> end() { return ListIterator<T> (); }
 
         // ===== ELEMENT ACCESS =====
         
@@ -226,24 +242,24 @@ namespace MyStl
             --m_size;
         }
         
-        ListIterator<T> insert(ListIterator<T> it, const T& value)
-        {
-
-
-            return ListIterator<T> ();
-        }
-        ListIterator<T> erase(ListIterator<T> it)
-        {
-
-
-            return ListIterator<T> ();
-        }
-        ListIterator<T> erase(ListIterator<T> itBegin, ListIterator<T> itEnd)
-        {
-
-
-            return ListIterator<T> ();
-        }
+        // ListIterator<T> insert(ListIterator<T> it, const T& value)
+        // {
+        //
+        //
+        //     return ListIterator<T> ();
+        // }
+        // ListIterator<T> erase(ListIterator<T> it)
+        // {
+        //
+        //
+        //     return ListIterator<T> ();
+        // }
+        // ListIterator<T> erase(ListIterator<T> itBegin, ListIterator<T> itEnd)
+        // {
+        //
+        //
+        //     return ListIterator<T> ();
+        // }
         
         void remove(const T& value)
         {

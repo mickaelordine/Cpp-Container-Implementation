@@ -1,9 +1,11 @@
 
 #include <iostream>
 #include <list>
+#include <map>
 #include <ostream>
 
 #include "List.h"
+#include "Map.h"
 
 namespace ListTest
     {
@@ -196,26 +198,34 @@ namespace ListTest
             list.print();
             list.print_reverse();
         }
+
+        void full_test()
+        {
+            ListTest::test_basic_operations();
+            std::cout << "\n===================\n";
+            ListTest::test_pop_operations();
+            std::cout << "\n===================\n";
+            ListTest::test_copy_constructor();
+            std::cout << "\n===================\n";
+            ListTest::test_move_constructor();
+            std::cout << "\n===================\n";
+            ListTest::test_assignment_operators();
+            std::cout << "\n===================\n";
+            ListTest::test_clear();
+            std::cout << "\n===================\n";
+            ListTest::test_exceptions();
+            std::cout << "\n===================\n";
+            ListTest::test_with_strings();
+            std::cout << "\n===================\n";
+        }
     }
 
 int main(int argc, char* argv[])
 {
-    ListTest::test_basic_operations();
-    std::cout << "\n===================\n";
-    ListTest::test_pop_operations();
-    std::cout << "\n===================\n";
-    ListTest::test_copy_constructor();
-    std::cout << "\n===================\n";
-    ListTest::test_move_constructor();
-    std::cout << "\n===================\n";
-    ListTest::test_assignment_operators();
-    std::cout << "\n===================\n";
-    ListTest::test_clear();
-    std::cout << "\n===================\n";
-    ListTest::test_exceptions();
-    std::cout << "\n===================\n";
-    ListTest::test_with_strings();
-    std::cout << "\n===================\n";
+    ListTest::full_test();
+    MyStl::Map<const int, std::string> map;
+    std::pair<const int, std::string> pair(1,"hello");
+    map.insert(pair);
     
     return 0;
 }
