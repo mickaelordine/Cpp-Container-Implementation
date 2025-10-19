@@ -55,94 +55,53 @@ public:
     {
         insert(val);
     } // value constructor
-    Map(const Map& other)
+    Map(const Map& other) : root(nullptr), _size(0)
     {
-        clear();
-        std::stack<Node*> stack;
-        stack.push(root);
-        while (!stack.empty())
-        {
-            Node* _node = stack.top(); // we take the element in top
-            stack.pop(); // we remove it from the stack
-
-            // Post-order traversal
-            if (_node->left != nullptr)
-                stack.push(_node->left);
-            if (_node->right != nullptr)
-                stack.push(_node->right);
-            insert(_node->data);
-        }
+        if (other.root == nullptr)
+            return;
+        
+        copy_helper(other.root);
     }    // Copy constructor
     Map& operator=(const Map& other)
     {
         if (this != &other)
         {
             clear();
-            std::stack<Node*> stack;
-            stack.push(root);
-            while (!stack.empty())
-            {
-                Node* _node = stack.top(); // we take the element in top
-                stack.pop(); // we remove it from the stack
-
-                // Post-order traversal
-                if (_node->left != nullptr)
-                    stack.push(_node->left);
-                if (_node->right != nullptr)
-                    stack.push(_node->right);
-                insert(_node->data);
-            }
+        
+            if (other.root != nullptr)
+                copy_helper(other.root);
         }
         return *this;
     }   // Copy assignment
     Map(Map&& other) noexcept
     {
-        clear();
-        std::stack<Node*> stack;
-        stack.push(root);
-        while (!stack.empty())
+        if (this != &other)
         {
-            Node* _node = stack.top(); // we take the element in top
-            stack.pop(); // we remove it from the stack
-
-            // Post-order traversal
-            if (_node->left != nullptr)
-                stack.push(_node->left);
-            if (_node->right != nullptr)
-                stack.push(_node->right);
-            insert(_node->data);
+            clear();
+            root = other.root;
+            _size = other._size;
+            
+            other.root = nullptr;
+            other._size = 0;
         }
-        other.clear();
-        other.root = nullptr;
     }   // Move constructor
     Map& operator=(Map&& other) noexcept
     {
         if (this != &other)
         {
             clear();
-            std::stack<Node*> stack;
-            stack.push(root);
-            while (!stack.empty())
-            {
-                Node* _node = stack.top(); // we take the element in top
-                stack.pop(); // we remove it from the stack
-
-                // Post-order traversal
-                if (_node->left != nullptr)
-                    stack.push(_node->left);
-                if (_node->right != nullptr)
-                    stack.push(_node->right);
-                insert(_node->data);
-            }
+            root = other.root;
+            _size = other._size;
+            
+            other.root = nullptr;
+            other._size = 0;
         }
-        other.clear();
-        other.root = nullptr;
         return *this;
     }    // Move assignment
     ~Map()
     {
         clear();
-        delete root;
+        //delete root; // la clear fa già la delete sulla root, noi qui stavamo facendo una deallocazione su memoria già deallocata
         root = nullptr;
     } //destructor
 
@@ -177,8 +136,9 @@ public:
     }
     void clear()
     {
-        clear_helper(root);
-        _size = 0; // questo potrebbe non funzionare, da qualche parte nullo qualcosa
+        clear_helper_recursive(root);
+        _size = 0;
+        root = nullptr;
     }
     int size() const { return _size; }
     bool empty() const { if (root == nullptr) return true; else return false;}
@@ -237,17 +197,13 @@ private:
         else
             return node;
     }
-    void clear_helper(Node* node)
+    void clear_helper_recursive(Node* node)
     {
         if (node == nullptr)
             return;
         
-        // Post-order traversal
-        if (node->left != nullptr)
-            clear_helper(node->left);
-        if (node->right != nullptr)
-            clear_helper(node->right);
-
+        clear_helper_recursive(node->left);
+        clear_helper_recursive(node->right);
         delete node;
     }
     void clear_helper_with_stack()
@@ -269,7 +225,15 @@ private:
                 stack.push(_node->right);
             delete _node;
         }
+    }
+    void copy_helper(Node* other_node)
+    {
+        if (other_node == nullptr)
+            return;
         
+        copy_helper(other_node->left);
+        insert(other_node->data);
+        copy_helper(other_node->right);
     }
     
 };
