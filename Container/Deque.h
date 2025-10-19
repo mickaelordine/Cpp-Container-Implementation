@@ -16,92 +16,289 @@
 #define DEFAULT_MAP_SIZE    8
 #define DEFAULT_CHUNK_SIZE 20
 
-
-template<typename T>
-class Deque<T>
+namespace MyStl
+{
+    template<typename T>
+    class Deque
     {
         // MEMBERS VARIABLE //
     public:
+        class iterator
+        {
+            iterator();
+            ~iterator();
+        };
     
 
-    protected:
-
     private:
-        T** map;              // map of pointers to chunks
-        size_t map_size;      // size of map
-        size_t first_block;   // first block index of map
-        size_t last_block;    // last block index of map
-        size_t first_elem;    // index of the first elem
-        size_t last_elem;     // index of the last elem
-        size_t count;         // count of elements in the Deque
+        T** map;
+        size_t map_size;
+        size_t first_chunk;
+        size_t last_chunk;
+        size_t first_offset;
+        size_t last_offset;
+        size_t _size;
         
         // MEMBERS VARIABLE //
 
         // MEMBERS FUNCTIONS //
     public:
-    Deque() : map(nullptr), map_size(0), first_block(0), last_block(0), first_elem(0), last_elem(0), count(0)
-    {
-        // create a Deque with default map size and chunk size
-        map_size = DEFAULT_MAP_SIZE;
-        map = new T * [map_size];
-        for (size_t i = 0; i < map_size; i++)
+        Deque() 
+            : map(nullptr)
+            , map_size(DEFAULT_MAP_SIZE)
+            , first_chunk(0)
+            , last_chunk(0)
+            , first_offset(0)
+            , last_offset(0)
+            , _size(0)
         {
-            map[i] = nullptr;
-        }
-        first_block = map_size / 2;
-        last_block = first_block;
-        map[first_block] = new T[DEFAULT_CHUNK_SIZE];
-        first_elem = DEFAULT_CHUNK_SIZE / 2; // starting from the middle of the chunk
-        last_elem = first_elem;
-    }                     // default constructor
-    Deque(const Deque &other) 
-    {
-        map_size = other.map_size;
-        map = new T * [map_size];
-        for (size_t i = 0; i < map_size; i++)
+            allocate_map(map_size);
+            
+            // Start from center
+            first_chunk = map_size / 2;
+            last_chunk = first_chunk;
+            
+            // Allocate first chunk
+            map[first_chunk] = new T[DEFAULT_CHUNK_SIZE];
+            
+            // Start from middle of chunk
+            first_offset = DEFAULT_CHUNK_SIZE / 2;
+            last_offset = first_offset;
+        }   // default constructor
+        Deque(const Deque& other)
+            : map(nullptr)
+            , map_size(other.map_size)
+            , first_chunk(other.first_chunk)
+            , last_chunk(other.last_chunk)
+            , first_offset(other.first_offset)
+            , last_offset(other.last_offset)
+            , _size(other._size)
         {
-            if (other.map[i] != nullptr)
+            allocate_map(map_size);
+            
+            // Copy only used chunks
+            for (size_t i = first_chunk; i <= last_chunk; ++i)
             {
-                map[i] = new T[DEFAULT_CHUNK_SIZE];
-                for (size_t j = 0; j < DEFAULT_CHUNK_SIZE; j++)
+                if (other.map[i] != nullptr)
                 {
-                    map[i][j] = other.map[i][j];
+                    map[i] = new T[DEFAULT_CHUNK_SIZE];
+                    
+                    // Copy elements
+                    for (size_t j = 0; j < DEFAULT_CHUNK_SIZE; ++j)
+                    {
+                        map[i][j] = other.map[i][j];
+                    }
                 }
             }
-            else
-            {
-                map[i] = nullptr;
-            }
-        }
-        first_block = other.first_block;
-        last_block = other.last_block;
-        first_elem = other.first_elem;
-        last_elem = other.last_elem;
-        count = other.count;
-    }   // copy constructor
-    ~Deque()
-    {
-        // Dealloca solo i blocchi effettivamente allocati
-        for (size_t i = first_block; i <= last_block && map != nullptr; i++)
+        }   // copy constructor
+        Deque& operator=(const Deque& other)
         {
-            if (map[i] != nullptr)
+            if (this != &other)
             {
-                delete[] map[i];
-            }
+                // Clear current content
+                clear();
+                deallocate_map();
                 
+                // Copy from other
+                map_size = other.map_size;
+                first_chunk = other.first_chunk;
+                last_chunk = other.last_chunk;
+                first_offset = other.first_offset;
+                last_offset = other.last_offset;
+                _size = other._size;
+                
+                allocate_map(map_size);
+                
+                for (size_t i = first_chunk; i <= last_chunk; ++i)
+                {
+                    if (other.map[i] != nullptr)
+                    {
+                        map[i] = new T[DEFAULT_CHUNK_SIZE];
+                        for (size_t j = 0; j < DEFAULT_CHUNK_SIZE; ++j)
+                        {
+                            map[i][j] = other.map[i][j];
+                        }
+                    }
+                }
+            }
+            return *this;
+        } // copy assignment
+        ~Deque()
+        {
+            clear();
+            deallocate_map();
+        } // destructor
+
+        // access functions //
+        T& operator[](size_t index)
+        {
+            size_t chunk_index = first_chunk + (first_offset + index) / DEFAULT_CHUNK_SIZE;
+            size_t offset_index = (first_offset + index) % DEFAULT_CHUNK_SIZE;
+            if (chunk_index > last_chunk || (chunk_index == last_chunk && offset_index > last_offset))
+                throw std::out_of_range("Deque::[] - index out of range");
+            return map[chunk_index][offset_index];
         }
-    
-        // Poi dealloca la map
-        delete[] map;
-    } 
-    
-    
-    protected:
+        T& at(size_t index)
+        {
+            size_t chunk_index = first_chunk + (first_offset + index) / DEFAULT_CHUNK_SIZE;
+            size_t offset_index = (first_offset + index) % DEFAULT_CHUNK_SIZE;
+            if (chunk_index > last_chunk || (chunk_index == last_chunk && offset_index > last_offset))
+                throw std::out_of_range("Deque::at - index out of range");
+            return map[chunk_index][offset_index];
+        }
+        
+        T& front() { return map[first_chunk][first_offset]; }
+        const T& front() const { return map[first_chunk][first_offset]; }
+        
+        T& back() { return map[last_chunk][last_offset]; }
+        const T& back() const { return map[last_chunk][last_offset]; }
+        
+        // modifiers //
+        void push_front(T value)
+        {
+            // Check if current chunk is full at front
+            if (first_offset == 0)
+            {
+                // Need new chunk
+                if (first_chunk == 0)
+                    reallocate_map();
+                
+                --first_chunk;
+                
+                if (map[first_chunk] == nullptr)
+                    map[first_chunk] = new T[DEFAULT_CHUNK_SIZE];
+                
+                first_offset = DEFAULT_CHUNK_SIZE;
+            }
+            
+            --first_offset;
+            map[first_chunk][first_offset] = value;
+            ++_size;
+        }
+        void push_back(T value)
+        {
+            // Check if current chunk is full at back
+            if (last_offset == DEFAULT_CHUNK_SIZE - 1)
+            {
+                // Need new chunk
+                if (last_chunk == map_size - 1)
+                    reallocate_map();
+                
+                ++last_chunk;
+                
+                if (map[last_chunk] == nullptr)
+                    map[last_chunk] = new T[DEFAULT_CHUNK_SIZE];
+                
+                last_offset = 0;
+            }
+            
+            ++last_offset;
+            map[last_chunk][last_offset] = value;
+            ++_size;
+        }
+        
+        void insert(size_t index, T value)
+        {
+            
+        }
+        
+        void pop_front()
+        {
+            
+        }
+        void pop_back()
+        {
+            
+        }
+        
+        void erase(size_t index)
+        {
+            
+        }
+        void erase(size_t start, size_t end)
+        {
+            
+        }
+        
+        // Capacity //
+        size_t size() const { return _size; }
+        bool empty() const { return _size == 0; }
+
+        // debug functions //
+         void print() const
+        {
+            std::cout << "\n=== Deque Structure ===\n";
+            std::cout << "Map size: " << map_size << "\n";
+            std::cout << "Size: " << _size << "\n";
+            std::cout << "First chunk: " << first_chunk << ", offset: " << first_offset << "\n";
+            std::cout << "Last chunk: " << last_chunk << ", offset: " << last_offset << "\n";
+            std::cout << "\nChunks:\n";
+            
+            for (size_t i = 0; i < map_size; ++i)
+            {
+                if (map[i] != nullptr)
+                {
+                    std::cout << "  [" << i << "]: allocated";
+                    if (i == first_chunk) std::cout << " (first)";
+                    if (i == last_chunk) std::cout << " (last)";
+                    std::cout << "\n";
+                }
+            }
+        }
 
     private:
-
+        // helper functions for memory management //
+        void allocate_map(size_t size)
+        {
+            map = new T*[size];
+            for (size_t i = 0; i < size; ++i)
+                map[i] = nullptr;
+        }
+        void deallocate_map()
+        {
+            if (map == nullptr)
+                return;
+            
+            for (size_t i = 0; i < map_size; ++i)
+            {
+                if (map[i] != nullptr)
+                    delete[] map[i];
+            }
+            delete[] map;
+            map = nullptr;
+        }
+        void reallocate_map()
+        {
+            
+        }
+        void clear()
+        {
+            if (map == nullptr)
+                return;
+            
+            // Deallocate only used chunks
+            for (size_t i = first_chunk; i <= last_chunk; ++i)
+            {
+                if (map[i] != nullptr)
+                {
+                    delete[] map[i];
+                    map[i] = nullptr;
+                }
+            }
+            
+            // Reset to initial state
+            first_chunk = map_size / 2;
+            last_chunk = first_chunk;
+            
+            if (map[first_chunk] == nullptr)
+                map[first_chunk] = new T[DEFAULT_CHUNK_SIZE];
+            
+            first_offset = DEFAULT_CHUNK_SIZE / 2;
+            last_offset = first_offset;
+            _size = 0;
+        }
+        
         // MEMBERS FUNCTIONS //
     };
-
-
+}
 
