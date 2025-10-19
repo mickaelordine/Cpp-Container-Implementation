@@ -545,6 +545,40 @@ namespace MapTest
         std::cout << "map[7] = " << map[7] << "\n";
         std::cout << "map[20] = " << map[20] << "\n";
     }
+
+    // Test 12: Iterator
+    void testIterator()
+    {
+        MyStl::Map<int, std::string> map;
+        map.insert({10, "Ten"});
+        map.insert({5, "Five"});
+        map.insert({15, "Fifteen"});
+        map.insert({3, "Three"});
+        map.insert({7, "Seven"});
+    
+        std::cout << "=== Iterating with range-based for ===\n";
+        for (auto& pair : map)
+        {
+            std::cout << pair.first << " -> " << pair.second << "\n";
+        }
+    
+        std::cout << "\n=== Iterating with explicit iterator ===\n";
+        for (auto it = map.begin(); it != map.end(); ++it)
+        {
+            std::cout << it->first << " -> " << it->second << "\n";
+        }
+    
+        std::cout << "\n=== Modifying values through iterator ===\n";
+        for (auto it = map.begin(); it != map.end(); ++it)
+        {
+            it->second += "!";  // Modifica il valore
+        }
+    
+        for (auto& pair : map)
+        {
+            std::cout << pair.first << " -> " << pair.second << "\n";
+        }
+    }
     
     // Funzione principale per eseguire tutti i test
     void runAllTests()
@@ -566,6 +600,7 @@ namespace MapTest
             testClear();
             testStress();
             testErase();
+            testIterator();
 
             printSeparator("SUMMARY");
             std::cout << "✓ All tests completed!\n";
@@ -580,6 +615,8 @@ namespace MapTest
 int main(int argc, char* argv[])
 {
     //ListTest::full_test();
-    MapTest::runAllTests();
+    //MapTest::runAllTests();
+    
+    
     return 0;
 }

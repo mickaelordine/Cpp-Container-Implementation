@@ -27,15 +27,103 @@ namespace MyStl
         class iterator
         {
         public:
-            iterator() {}
-            ~iterator() {}
+            typedef value_type* pointer;
+            typedef value_type& reference;
 
-            // functions //
-            
-        protected:
-            
         private:
             Node* current;
+            std::stack<Node*> stack;
+    
+            friend class Map;
+            
+        public:
+            iterator() : current(nullptr) {}
+            iterator(Node* root, bool end = false)
+            {
+                if (end || root == nullptr)
+                {
+                    current = nullptr;
+                    return;
+                }
+        
+                // Inizializza: vai al nodo più a sinistra (minimo)
+                current = root;
+                while (current != nullptr)
+                {
+                    stack.push(current);
+                    current = current->left;
+                }
+        
+                // current è nullptr, lo stack contiene il percorso
+                // Pop per ottenere il primo elemento
+                if (!stack.empty())
+                {
+                    current = stack.top();
+                    stack.pop();
+                }
+            }
+            ~iterator()
+            {
+                delete current;
+            }
+
+            // functions //
+            bool operator==(const iterator& other) const
+            {
+                return current == other.current;
+            }
+    
+            bool operator!=(const iterator& other) const
+            {
+                return current != other.current;
+            }
+            
+            reference operator*()
+            {
+                return current->data;
+            }
+    
+            pointer operator->()
+            {
+                return &(current->data);
+            }
+            
+            iterator& operator++()  // Pre-incremento: ++it
+            {
+                if (current == nullptr)
+                    return *this;
+                
+                if (current->right != nullptr)
+                {
+                    current = current->right;
+                    while (current->left != nullptr)
+                    {
+                        stack.push(current);
+                        current = current->left;
+                    }
+                }
+                
+                else if (!stack.empty())
+                {
+                    current = stack.top();
+                    stack.pop();
+                }
+                
+                else
+                {
+                    current = nullptr;
+                }
+        
+                return *this;
+            }
+            
+            iterator operator++(int)  // Post-incremento: it++
+                {
+                iterator temp = *this;
+                ++(*this);
+                return temp;
+                }
+            
         }; // implemented like a Forward Iterator
 
     public:
@@ -161,6 +249,16 @@ namespace MyStl
         void insert(const value_type& pair)
         {
             root = insert_helper(root, pair);
+        }
+
+        // ITERATORS //
+        iterator begin()
+        {
+            return iterator(root, false);  // Inizia dal minimo
+        }
+        iterator end()
+        {
+            return iterator(root, true);   // End iterator (nullptr)
         }
 
 
