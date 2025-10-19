@@ -507,7 +507,45 @@ namespace MapTest
         std::cout << "  ✓ Cleared map\n";
         std::cout << "  Size after clear: " << map.size() << "\n";
     }
-
+    
+    // Test 11: Erase
+    void testErase()
+    {
+        MyStl::Map<int, std::string> map;
+    
+        // Costruisci albero
+        map.insert({10, "Ten"});
+        map.insert({5, "Five"});
+        map.insert({15, "Fifteen"});
+        map.insert({3, "Three"});
+        map.insert({7, "Seven"});
+        map.insert({12, "Twelve"});
+        map.insert({20, "Twenty"});
+    
+        std::cout << "Initial size: " << map.size() << "\n\n";
+    
+        // Caso 1: Foglia
+        std::cout << "=== Test 1: Erase leaf (3) ===\n";
+        map.erase(3);
+        std::cout << "Size: " << map.size() << "\n\n";
+    
+        // Caso 2: Un figlio
+        std::cout << "=== Test 2: Erase node with one child (5) ===\n";
+        map.erase(5);
+        std::cout << "Size: " << map.size() << "\n\n";
+    
+        // Caso 3: Due figli
+        std::cout << "=== Test 3: Erase node with two children (15) ===\n";
+        map.erase(15);
+        std::cout << "Size: " << map.size() << "\n\n";
+    
+        // Verifica contenuto
+        std::cout << "=== Remaining elements ===\n";
+        std::cout << "map[10] = " << map[10] << "\n";
+        std::cout << "map[7] = " << map[7] << "\n";
+        std::cout << "map[20] = " << map[20] << "\n";
+    }
+    
     // Funzione principale per eseguire tutti i test
     void runAllTests()
     {
@@ -527,6 +565,7 @@ namespace MapTest
             testMoveAssignment();
             testClear();
             testStress();
+            testErase();
 
             printSeparator("SUMMARY");
             std::cout << "✓ All tests completed!\n";
