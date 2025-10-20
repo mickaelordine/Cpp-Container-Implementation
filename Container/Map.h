@@ -192,7 +192,7 @@ namespace MyStl
         } //destructor
 
         // UTILS //
-        value_type find(const K key)
+        value_type find(const K& key)
         {
             Node* elem = find_helper(root, key);
             if (!elem)
@@ -284,7 +284,7 @@ namespace MyStl
             
             return node;
         }
-        Node* find_helper(Node* node, const K key)
+        Node* find_helper(Node* node, const K& key)
         {
             if (node == nullptr)
                 return nullptr;

@@ -25,8 +25,8 @@ namespace MyStl
     public:
         class iterator
         {
-            iterator();
-            ~iterator();
+            iterator(){}
+            ~iterator(){}
         };
     
 
@@ -147,14 +147,14 @@ namespace MyStl
             return map[chunk_index][offset_index];
         }
         
-        T& front() { return map[first_chunk][first_offset]; }
-        const T& front() const { return map[first_chunk][first_offset]; }
+        T& front() { return (*this)[0]; }
+        const T& front() const { return (*this)[0]; }
         
-        T& back() { return map[last_chunk][last_offset]; }
-        const T& back() const { return map[last_chunk][last_offset]; }
+        T& back() { return (*this)[_size - 1]; }
+        const T& back() const { return (*this)[_size - 1]; }
         
         // modifiers //
-        void push_front(T value)
+        void push_front(const T& value)
         {
             // Check if current chunk is full at front
             if (first_offset == 0)
@@ -175,10 +175,10 @@ namespace MyStl
             map[first_chunk][first_offset] = value;
             ++_size;
         }
-        void push_back(T value)
+        void push_back(const T& value)
         {
             // Check if current chunk is full at back
-            if (last_offset == DEFAULT_CHUNK_SIZE - 1)
+            if (last_offset == DEFAULT_CHUNK_SIZE)
             {
                 // Need new chunk
                 if (last_chunk == map_size - 1)
@@ -192,32 +192,148 @@ namespace MyStl
                 last_offset = 0;
             }
             
-            ++last_offset;
             map[last_chunk][last_offset] = value;
+            ++last_offset;
             ++_size;
         }
-        
-        void insert(size_t index, T value)
+
+        // the insert function always move the element to the right, but if you ask to insert in front o back, we do it in O(1) with push_front and push_back
+        void insert(size_t index, const T& value)
         {
-            
+            if (index > _size)
+                throw std::out_of_range("Deque::insert - index out of range");
+
+            if (index == 0) {
+                push_front(value);
+                return;
+            }
+            if (index == _size) {
+                push_back(value);
+                return;
+            }
+
+            // shift right side
+            push_back(back()); // we copy the last element to create space
+            for (size_t i = _size - 2; i > index; --i) // we start from _size - 2 because we just added one element at the back
+                (*this)[i + 1] = (*this)[i];
+            (*this)[index] = value;
         }
         
         void pop_front()
         {
+            if (_size == 0)
+                throw std::out_of_range("Deque::pop_front - deque is empty");
+    
+            ++first_offset;
+            --_size;
             
+            if (first_offset == DEFAULT_CHUNK_SIZE)
+            {
+                // if we are at the end of the chunk, move to next chunk
+                if (first_chunk < last_chunk)
+                {
+                    //delete[] map[first_chunk];
+                    map[first_chunk] = nullptr;
+            
+                    ++first_chunk;
+                    first_offset = 0;
+                }
+                // else, we are at the last chunk, do nothing
+            }
         }
         void pop_back()
         {
+            if (_size == 0)
+                throw std::out_of_range("Deque::pop_back - deque is empty");
+    
+            --last_offset;
+            --_size;
             
+            if (last_offset == static_cast<size_t>(-1))
+            {
+                // if we are at the begin of the chunk, move to the previous chunk
+                if (last_chunk > first_chunk)
+                {
+                    //delete[] map[first_chunk];
+                    map[last_chunk] = nullptr;
+            
+                    --last_chunk;
+                    last_offset = DEFAULT_CHUNK_SIZE;
+                }
+                // else, we are at the first chunk, do nothing
+            }
         }
-        
+
+        // the function erase will always shit elements to the left, if you call it at the end or start insteas O(1) thanks to pops
         void erase(size_t index)
         {
-            
+            if (index > _size)
+                throw std::out_of_range("Deque::erase - index out of range");
+
+            if (index == 0) {
+                pop_front();
+                return;
+            }
+            if (index == _size) {
+                pop_back();
+                return;
+            }
+            // shift to left side
+            for (size_t i = index; i < _size - 1; ++i)
+                (*this)[i] = (*this)[i + 1];
+            pop_back();
         }
         void erase(size_t start, size_t end)
         {
+            if (start > end || end > _size)
+                throw std::out_of_range("Deque::erase(range) - invalid range");
+
+            size_t count = end - start;
+            if (count == 0)
+                return;
+
+            if (start == 0)
+            {
+                for (size_t i = 0; i < count; ++i) pop_front();
+                return;
+            }
+            if (end == _size)
+            {
+                for (size_t i = 0; i < count; ++i) pop_back();
+                return;
+            }
+            // shift to left side
+            for (size_t i = start; i < _size - count; ++i)
+                (*this)[i] = (*this)[i + count];
+            for (size_t i = 0; i < count; ++i)
+                pop_back();
+        }
+
+        void clear()
+        {
+            if (map == nullptr)
+                return;
             
+            // Deallocate only used chunks
+            for (size_t i = first_chunk; i <= last_chunk; ++i)
+            {
+                if (map[i] != nullptr)
+                {
+                    delete[] map[i];
+                    map[i] = nullptr;
+                }
+            }
+            
+            // Reset to initial state
+            first_chunk = map_size / 2;
+            last_chunk = first_chunk;
+            
+            if (map[first_chunk] == nullptr)
+                map[first_chunk] = new T[DEFAULT_CHUNK_SIZE];
+            
+            first_offset = DEFAULT_CHUNK_SIZE / 2;
+            last_offset = first_offset;
+            _size = 0;
         }
         
         // Capacity //
@@ -269,34 +385,27 @@ namespace MyStl
         }
         void reallocate_map()
         {
+            size_t new_size = map_size * 2;
+            T** new_map = new T*[new_size];
+    
+            for (size_t i = 0; i < new_size; ++i)
+                new_map[i] = nullptr;
             
-        }
-        void clear()
-        {
-            if (map == nullptr)
-                return;
-            
-            // Deallocate only used chunks
+            size_t offset = new_size / 4;
             for (size_t i = first_chunk; i <= last_chunk; ++i)
             {
-                if (map[i] != nullptr)
-                {
-                    delete[] map[i];
-                    map[i] = nullptr;
-                }
+                new_map[offset + (i - first_chunk)] = map[i];
             }
-            
-            // Reset to initial state
-            first_chunk = map_size / 2;
-            last_chunk = first_chunk;
-            
-            if (map[first_chunk] == nullptr)
-                map[first_chunk] = new T[DEFAULT_CHUNK_SIZE];
-            
-            first_offset = DEFAULT_CHUNK_SIZE / 2;
-            last_offset = first_offset;
-            _size = 0;
+    
+            size_t num_used = last_chunk - first_chunk + 1;
+            first_chunk = offset;
+            last_chunk = offset + num_used - 1;
+    
+            delete[] map;
+            map = new_map;
+            map_size = new_size;
         }
+        
         
         // MEMBERS FUNCTIONS //
     };

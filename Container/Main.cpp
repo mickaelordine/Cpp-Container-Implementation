@@ -6,7 +6,9 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <cassert>
 
+#include "Deque.h"
 #include "List.h"
 #include "Map.h"
 
@@ -612,11 +614,529 @@ namespace MapTest
     }
 }
 
+namespace DequeTest
+{
+    // Utility functions
+    void printSeparator(const std::string& title = "")
+    {
+        std::cout << "\n" << std::string(70, '=') << "\n";
+        if (!title.empty())
+            std::cout << "  " << title << "\n" << std::string(70, '=') << "\n";
+    }
+
+    void printSubSection(const std::string& title)
+    {
+        std::cout << "\n--- " << title << " ---\n";
+    }
+
+    template<typename T>
+    void printDeque(MyStl::Deque<T>& dq, const std::string& name)
+    {
+        std::cout << "📦 Deque [" << name << "] - Size: " << dq.size() << "\n";
+        std::cout << "   Elements: [";
+        for (size_t i = 0; i < dq.size(); ++i)
+        {
+            std::cout << dq[i];
+            if (i < dq.size() - 1) std::cout << ", ";
+        }
+        std::cout << "]\n";
+    }
+
+    // TEST 1: Default Constructor
+    void testDefaultConstructor()
+    {
+        printSeparator("TEST 1: Default Constructor");
+        
+        MyStl::Deque<int> dq;
+        
+        std::cout << "✓ Created empty deque\n";
+        std::cout << "  Size: " << dq.size() << " (expected: 0)\n";
+        std::cout << "  Empty: " << (dq.empty() ? "Yes" : "No") << "\n";
+        
+        assert(dq.size() == 0);
+        assert(dq.empty());
+        
+        std::cout << "✓ Test PASSED!\n";
+    }
+
+    // TEST 2: Push Back
+    void testPushBack()
+    {
+        printSeparator("TEST 2: Push Back");
+        
+        MyStl::Deque<int> dq;
+        
+        printSubSection("Pushing elements to back");
+        for (int i = 1; i <= 5; ++i)
+        {
+            dq.push_back(i * 10);
+            std::cout << "  [" << i << "] Pushed " << (i * 10) 
+                      << " - Size: " << dq.size() << "\n";
+        }
+        
+        printDeque(dq, "after push_back");
+        
+        assert(dq.size() == 5);
+        assert(dq.front() == 10);
+        assert(dq.back() == 50);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 3: Push Front
+    void testPushFront()
+    {
+        printSeparator("TEST 3: Push Front");
+        
+        MyStl::Deque<int> dq;
+        
+        printSubSection("Pushing elements to front");
+        for (int i = 1; i <= 5; ++i)
+        {
+            dq.push_front(i * 10);
+            std::cout << "  [" << i << "] Pushed " << (i * 10) 
+                      << " - Size: " << dq.size() << "\n";
+        }
+        
+        printDeque(dq, "after push_front");
+        
+        std::cout << "\n  Expected order: [50, 40, 30, 20, 10]\n";
+        
+        assert(dq.size() == 5);
+        assert(dq.front() == 50);
+        assert(dq.back() == 10);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 4: Mixed Push Front and Back
+    void testMixedPush()
+    {
+        printSeparator("TEST 4: Mixed Push Front & Back");
+        
+        MyStl::Deque<std::string> dq;
+        
+        printSubSection("Alternating push operations");
+        dq.push_back("C");
+        std::cout << "  push_back(C): "; printDeque(dq, "dq");
+        
+        dq.push_front("B");
+        std::cout << "  push_front(B): "; printDeque(dq, "dq");
+        
+        dq.push_back("D");
+        std::cout << "  push_back(D): "; printDeque(dq, "dq");
+        
+        dq.push_front("A");
+        std::cout << "  push_front(A): "; printDeque(dq, "dq");
+        
+        dq.push_back("E");
+        std::cout << "  push_back(E): "; printDeque(dq, "dq");
+        
+        std::cout << "\n  Expected: [A, B, C, D, E]\n";
+        
+        assert(dq.size() == 5);
+        assert(dq[0] == "A");
+        assert(dq[2] == "C");
+        assert(dq[4] == "E");
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 5: Operator[] and at()
+    void testElementAccess()
+    {
+        printSeparator("TEST 5: Element Access (operator[] and at())");
+        
+        MyStl::Deque<int> dq;
+        for (int i = 0; i < 10; ++i)
+            dq.push_back(i * 5);
+        
+        printDeque(dq, "test deque");
+        
+        printSubSection("Using operator[]");
+        std::cout << "  dq[0] = " << dq[0] << " (expected: 0)\n";
+        std::cout << "  dq[5] = " << dq[5] << " (expected: 25)\n";
+        std::cout << "  dq[9] = " << dq[9] << " (expected: 45)\n";
+        
+        printSubSection("Modifying through operator[]");
+        dq[5] = 999;
+        std::cout << "  dq[5] = 999\n";
+        std::cout << "  dq[5] = " << dq[5] << " (expected: 999)\n";
+        
+        printSubSection("Using at() with bounds checking");
+        try {
+            std::cout << "  dq.at(3) = " << dq.at(3) << "\n";
+            std::cout << "  Trying dq.at(100)...\n";
+            int val = dq.at(100);
+            std::cout << "  ❌ Should have thrown exception!\n";
+            assert(false);
+        } catch (const std::out_of_range& e) {
+            std::cout << "  ✓ Exception caught: " << e.what() << "\n";
+        }
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 6: Front and Back
+    void testFrontBack()
+    {
+        printSeparator("TEST 6: Front & Back Access");
+        
+        MyStl::Deque<int> dq;
+        dq.push_back(100);
+        dq.push_back(200);
+        dq.push_back(300);
+        
+        printDeque(dq, "test deque");
+        
+        std::cout << "\n  front() = " << dq.front() << " (expected: 100)\n";
+        std::cout << "  back() = " << dq.back() << " (expected: 300)\n";
+        
+        printSubSection("Modifying through front() and back()");
+        dq.front() = 111;
+        dq.back() = 333;
+        
+        printDeque(dq, "after modification");
+        
+        assert(dq.front() == 111);
+        assert(dq.back() == 333);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 7: Pop Back
+    void testPopBack()
+    {
+        printSeparator("TEST 7: Pop Back");
+        
+        MyStl::Deque<int> dq;
+        for (int i = 1; i <= 5; ++i)
+            dq.push_back(i * 10);
+        
+        printDeque(dq, "initial");
+        
+        printSubSection("Popping from back");
+        while (!dq.empty())
+        {
+            std::cout << "  Popping " << dq.back() << " - ";
+            dq.pop_back();
+            std::cout << "Size: " << dq.size() << "\n";
+        }
+        
+        std::cout << "\n  Final size: " << dq.size() << " (expected: 0)\n";
+        assert(dq.empty());
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 8: Pop Front
+    void testPopFront()
+    {
+        printSeparator("TEST 8: Pop Front");
+        
+        MyStl::Deque<int> dq;
+        for (int i = 1; i <= 5; ++i)
+            dq.push_back(i * 10);
+        
+        printDeque(dq, "initial");
+        
+        printSubSection("Popping from front");
+        while (!dq.empty())
+        {
+            std::cout << "  Popping " << dq.front() << " - ";
+            dq.pop_front();
+            std::cout << "Size: " << dq.size() << "\n";
+        }
+        
+        std::cout << "\n  Final size: " << dq.size() << " (expected: 0)\n";
+        assert(dq.empty());
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 9: Mixed Pop Operations
+    void testMixedPop()
+    {
+        printSeparator("TEST 9: Mixed Pop Operations");
+        
+        MyStl::Deque<int> dq;
+        for (int i = 1; i <= 10; ++i)
+            dq.push_back(i);
+        
+        printDeque(dq, "initial");
+        
+        printSubSection("Alternating pop operations");
+        
+        dq.pop_front();
+        std::cout << "  After pop_front(): "; printDeque(dq, "dq");
+        
+        dq.pop_back();
+        std::cout << "  After pop_back(): "; printDeque(dq, "dq");
+        
+        dq.pop_front();
+        std::cout << "  After pop_front(): "; printDeque(dq, "dq");
+        
+        dq.pop_back();
+        std::cout << "  After pop_back(): "; printDeque(dq, "dq");
+        
+        std::cout << "\n  Expected: [3, 4, 5, 6, 7, 8]\n";
+        
+        assert(dq.size() == 6);
+        assert(dq.front() == 3);
+        std::cout << "  dq.back() = " << dq.back() << "\n";
+        assert(dq.back() == 8);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 10: Clear
+    void testClear()
+    {
+        printSeparator("TEST 10: Clear");
+        
+        MyStl::Deque<int> dq;
+        for (int i = 0; i < 20; ++i)
+            dq.push_back(i);
+        
+        std::cout << "Size before clear: " << dq.size() << "\n";
+        
+        dq.clear();
+        
+        std::cout << "Size after clear: " << dq.size() << " (expected: 0)\n";
+        std::cout << "Empty: " << (dq.empty() ? "Yes" : "No") << "\n";
+        
+        printSubSection("Pushing after clear");
+        dq.push_back(999);
+        dq.push_front(111);
+        
+        printDeque(dq, "after clear and push");
+        
+        assert(dq.size() == 2);
+        assert(dq.front() == 111);
+        assert(dq.back() == 999);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 11: Copy Constructor
+    void testCopyConstructor()
+    {
+        printSeparator("TEST 11: Copy Constructor");
+        
+        MyStl::Deque<int> original;
+        for (int i = 1; i <= 5; ++i)
+            original.push_back(i * 10);
+        
+        printDeque(original, "original");
+        
+        printSubSection("Creating copy");
+        MyStl::Deque<int> copy(original);
+        
+        printDeque(copy, "copy");
+        
+        printSubSection("Verifying independence");
+        copy[2] = 999;
+        original.push_back(60);
+        
+        std::cout << "  Modified copy[2] = 999 and pushed 60 to original\n";
+        printDeque(original, "original");
+        printDeque(copy, "copy");
+        
+        assert(original.size() == 6);
+        assert(copy.size() == 5);
+        assert(original[2] == 30);
+        assert(copy[2] == 999);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 12: Copy Assignment
+    void testCopyAssignment()
+    {
+        printSeparator("TEST 12: Copy Assignment");
+        
+        MyStl::Deque<int> dq1;
+        for (int i = 1; i <= 5; ++i)
+            dq1.push_back(i);
+        
+        MyStl::Deque<int> dq2;
+        dq2.push_back(99);
+        dq2.push_back(88);
+        
+        std::cout << "Before assignment:\n";
+        printDeque(dq1, "dq1");
+        printDeque(dq2, "dq2");
+        
+        printSubSection("Assignment: dq2 = dq1");
+        dq2 = dq1;
+        
+        printDeque(dq2, "dq2 after assignment");
+        
+        printSubSection("Self-assignment test");
+        dq1 = dq1;
+        printDeque(dq1, "dq1 after self-assignment");
+        
+        assert(dq2.size() == 5);
+        assert(dq1.size() == 5);
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 13: Stress Test - Many Push/Pop
+    void testStress()
+    {
+        printSeparator("TEST 13: Stress Test");
+        
+        MyStl::Deque<int> dq;
+        const int N = 1000;
+        
+        printSubSection("Pushing 1000 elements from back");
+        for (int i = 0; i < N; ++i)
+            dq.push_back(i);
+        
+        std::cout << "  Size: " << dq.size() << " (expected: 1000)\n";
+        std::cout << "  dq[0] = " << dq[0] << " (expected: 0)\n";
+        std::cout << "  dq[500] = " << dq[500] << " (expected: 500)\n";
+        std::cout << "  dq[999] = " << dq[999] << " (expected: 999)\n";
+        
+        printSubSection("Pushing 1000 elements from front");
+        for (int i = 0; i < N; ++i)
+            dq.push_front(i + 10000);
+        
+        std::cout << "  Size: " << dq.size() << " (expected: 2000)\n";
+        std::cout << "  dq[0] = " << dq[0] << " (expected: 10999)\n";
+        std::cout << "  dq[999] = " << dq[999] << " (expected: 10000)\n";
+        std::cout << "  dq[1999] = " << dq[1999] << " (expected: 999)\n";
+        
+        printSubSection("Popping all elements");
+        while (!dq.empty())
+            dq.pop_back();
+        
+        std::cout << "  Size after popping all: " << dq.size() << "\n";
+        
+        assert(dq.empty());
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 14: Chunk Boundary Test
+    void testChunkBoundaries()
+    {
+        printSeparator("TEST 14: Chunk Boundary Crossing");
+        
+        MyStl::Deque<int> dq;
+        
+        // Assuming DEFAULT_CHUNK_SIZE = 16
+        const int CHUNK_SIZE = 16;
+        
+        printSubSection("Filling across multiple chunks");
+        for (int i = 0; i < CHUNK_SIZE * 3; ++i)
+        {
+            dq.push_back(i);
+        }
+        
+        std::cout << "  Pushed " << (CHUNK_SIZE * 3) << " elements\n";
+        std::cout << "  Size: " << dq.size() << "\n";
+        
+        printSubSection("Verifying elements across chunks");
+        std::cout << "  dq[0] = " << dq[0] << "\n";
+        std::cout << "  dq[15] = " << dq[15] << " (chunk boundary)\n";
+        std::cout << "  dq[16] = " << dq[16] << " (next chunk)\n";
+        std::cout << "  dq[31] = " << dq[31] << " (chunk boundary)\n";
+        std::cout << "  dq[32] = " << dq[32] << " (next chunk)\n";
+        
+        for (size_t i = 0; i < dq.size(); ++i)
+        {
+            std::cout << dq[i] << " ";
+            assert(dq[i] == static_cast<int>(i));
+        }
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // TEST 15: Exception Safety
+    void testExceptions()
+    {
+        printSeparator("TEST 15: Exception Safety");
+        
+        MyStl::Deque<int> dq;
+        
+        printSubSection("pop_back on empty deque");
+        try {
+            dq.pop_back();
+            std::cout << "  ❌ Should have thrown exception!\n";
+            assert(false);
+        } catch (const std::out_of_range& e) {
+            std::cout << "  ✓ Exception caught: " << e.what() << "\n";
+        }
+        
+        printSubSection("pop_front on empty deque");
+        try {
+            dq.pop_front();
+            std::cout << "  ❌ Should have thrown exception!\n";
+            assert(false);
+        } catch (const std::out_of_range& e) {
+            std::cout << "  ✓ Exception caught: " << e.what() << "\n";
+        }
+        
+        printSubSection("at() out of bounds");
+        dq.push_back(1);
+        try {
+            int val = dq.at(10);
+            std::cout << "  ❌ Should have thrown exception!\n";
+            assert(false);
+        } catch (const std::out_of_range& e) {
+            std::cout << "  ✓ Exception caught: " << e.what() << "\n";
+        }
+        
+        std::cout << "\n✓ Test PASSED!\n";
+    }
+
+    // Main test runner
+    void runAllTests()
+    {
+        std::cout << "\n";
+        std::cout << "//////////////////////////////////////////////////////////////////////\n";
+        std::cout << "/          MyStl::Deque - COMPREHENSIVE TEST SUITE                   /\n";
+        std::cout << "//////////////////////////////////////////////////////////////////////\n";
+
+        int passed = 0;
+        int total = 15;
+
+        try {
+            testDefaultConstructor(); ++passed;
+            testPushBack(); ++passed;
+            testPushFront(); ++passed;
+            testMixedPush(); ++passed;
+            testElementAccess(); ++passed;
+            testFrontBack(); ++passed;
+            testPopBack(); ++passed;
+            testPopFront(); ++passed;
+            testMixedPop(); ++passed;
+            testClear(); ++passed;
+            testCopyConstructor(); ++passed;
+            testCopyAssignment(); ++passed;
+            testStress(); ++passed;
+            testChunkBoundaries(); ++passed;
+            testExceptions(); ++passed;
+
+            printSeparator("SUMMARY");
+            std::cout << "✓ ALL TESTS PASSED! (" << passed << "/" << total << ")\n";
+            std::cout << " Your Deque implementation is working correctly!\n\n";
+
+        } catch (const std::exception& e) {
+            std::cout << "\n FATAL ERROR: " << e.what() << "\n";
+            std::cout << "Tests passed: " << passed << "/" << total << "\n\n";
+        }
+    }
+}
+
+
 int main(int argc, char* argv[])
 {
     //ListTest::full_test();
     //MapTest::runAllTests();
-    
+    DequeTest::runAllTests();
     
     return 0;
 }
