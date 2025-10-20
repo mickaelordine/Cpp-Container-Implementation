@@ -123,6 +123,52 @@ namespace MyStl
             }
             return *this;
         } // copy assignment
+        Deque(Deque&& other) noexcept
+            : map(other.map)
+            , map_size(other.map_size)
+            , first_chunk(other.first_chunk)
+            , last_chunk(other.last_chunk)
+            , first_offset(other.first_offset)
+            , last_offset(other.last_offset)
+            , _size(other._size)
+        {
+            // Reset other to empty state
+            other.map = nullptr;
+            other.map_size = 0;
+            other.first_chunk = 0;
+            other.last_chunk = 0;
+            other.first_offset = 0;
+            other.last_offset = 0;
+            other._size = 0;
+        } // Move constructor
+        Deque& operator=(Deque&& other) noexcept
+        {
+            if (this != &other)
+            {
+                // Clean up current resources
+                clear();
+                deallocate_map();
+        
+                // Steal resources from other
+                map = other.map;
+                map_size = other.map_size;
+                first_chunk = other.first_chunk;
+                last_chunk = other.last_chunk;
+                first_offset = other.first_offset;
+                last_offset = other.last_offset;
+                _size = other._size;
+        
+                // Reset other to empty state
+                other.map = nullptr;
+                other.map_size = 0;
+                other.first_chunk = 0;
+                other.last_chunk = 0;
+                other.first_offset = 0;
+                other.last_offset = 0;
+                other._size = 0;
+            }
+            return *this;
+        } // Move assignment operator
         ~Deque()
         {
             clear();

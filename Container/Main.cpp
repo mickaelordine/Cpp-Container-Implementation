@@ -9,6 +9,8 @@
 #include "List.h"
 #include "Map.h"
 #include "Set.h"
+#include "Stack.h"
+#include "Queue.h"
 
 namespace ListTest
     {
@@ -1415,13 +1417,176 @@ namespace SetTest
    }
 }
 
+namespace StackTest
+{
+    using MyStl::Stack;
+
+static auto expect = [](bool cond, const char* msg) -> bool {
+    if (!cond) {
+        std::cerr << "FAIL: " << msg << '\n';
+        return false;
+    }
+    std::cout << "PASS: " << msg << '\n';
+    return true;
+};
+
+static bool test_default_constructor()
+{
+    Stack<int> s;
+    return expect(s.empty() && s.size() == 0, "default constructor -> empty & size==0");
+}
+
+static bool test_push_pop_top()
+{
+    Stack<int> s;
+    s.push(1);
+    s.push(2);
+    s.push(3);
+    bool ok = true;
+    ok &= expect(s.size() == 3, "push -> size()==3");
+    ok &= expect(s.top() == 3, "top()==3 after pushes");
+    s.pop();
+    ok &= expect(s.top() == 2 && s.size() == 2, "pop -> top()==2 and size()==2");
+    s.pop(); s.pop();
+    ok &= expect(s.empty(), "pop all -> empty()");
+    return ok;
+}
+
+static bool test_copy_constructor()
+{
+    Stack<int> a;
+    a.push(10); a.push(20);
+    Stack<int> b(a); // copy
+    bool ok = true;
+    ok &= expect(b.size() == a.size(), "copy ctor -> same size");
+    ok &= expect(b.top() == a.top(), "copy ctor -> same top");
+    a.pop(); // modify original
+    ok &= expect(b.size() == 2 && b.top() == 20, "copy ctor -> deep copy (original modified doesn't change copy)");
+    return ok;
+}
+
+static bool test_move_constructor()
+{
+    Stack<int> a;
+    a.push(5); a.push(6);
+    Stack<int> b(std::move(a));
+    bool ok = true;
+    ok &= expect(b.size() == 2 && b.top() == 6, "move ctor -> moved container has contents");
+    return ok;
+}
+
+static bool test_copy_assignment()
+{
+    Stack<int> src;
+    src.push(7); src.push(8); src.push(9);
+    Stack<int> dst;
+    dst = src;
+    bool ok = true;
+    ok &= expect(dst.size() == src.size(), "copy assignment -> same size");
+    src.pop();
+    ok &= expect(dst.size() == 3, "copy assignment -> deep copy (dst unchanged after src modification)");
+    return ok;
+}
+
+static bool test_move_assignment()
+{
+    Stack<int> src;
+    src.push(11); src.push(12);
+    Stack<int> dst;
+    dst = std::move(src);
+    bool ok = true;
+    ok &= expect(dst.size() == 2 && dst.top() == 12, "move assignment -> dst has moved contents");
+    //ok &= expect(src.empty(), "move assignment -> src empty after move [expected]");
+    return ok;
+}
+
+static bool test_swap()
+{
+    Stack<int> a, b;
+    a.push(1); a.push(2);
+    b.push(10);
+    a.swap(b);
+    bool ok = true;
+    ok &= expect(a.size() == 1 && a.top() == 10, "swap -> a has b's contents");
+    ok &= expect(b.size() == 2 && b.top() == 2, "swap -> b has a's contents");
+    return ok;
+}
+
+static bool test_exceptions()
+{
+    Stack<int> s;
+    bool ok = true;
+    try {
+        s.top();
+        ok &= expect(false, "top on empty should throw");
+    } catch (const std::out_of_range&) {
+        ok &= expect(true, "top on empty throws std::out_of_range");
+    } catch (...) {
+        ok &= expect(false, "top on empty threw unexpected exception");
+    }
+
+    try {
+        s.pop();
+        ok &= expect(false, "pop on empty should throw");
+    } catch (const std::out_of_range&) {
+        ok &= expect(true, "pop on empty throws std::out_of_range");
+    } catch (...) {
+        ok &= expect(false, "pop on empty threw unexpected exception");
+    }
+
+    return ok;
+}
+
+static bool test_self_assignment()
+{
+    Stack<int> s;
+    s.push(42);
+    bool ok = true;
+    s = s; // self copy-assignment
+    ok &= expect(!s.empty() && s.top() == 42, "self copy-assignment -> no change / no crash");
+    s = std::move(s); // self move-assignment
+    ok &= expect(!s.empty() && s.top() == 42, "self move-assignment -> no change / no crash");
+    return ok;
+}
+
+int runAllTest()
+{
+    bool all_ok = true;
+    all_ok &= test_default_constructor();
+    all_ok &= test_push_pop_top();
+    all_ok &= test_copy_constructor();
+    all_ok &= test_move_constructor();
+    all_ok &= test_copy_assignment();
+    all_ok &= test_move_assignment();
+    all_ok &= test_swap();
+    all_ok &= test_exceptions();
+    all_ok &= test_self_assignment();
+
+    if (!all_ok) {
+        std::cerr << "Some tests failed.\n";
+        return 1;
+    }
+    std::cout << "All tests passed.\n";
+    return 0;
+}
+}
+
+namespace QueueTest
+{
+    
+}
 
 int main()
 {
     //ListTest::full_test();
     //MapTest::runAllTests();
     //DequeTest::runAllTests();
-    SetTest::run_all_tests();
+    //SetTest::run_all_tests();
+    StackTest::runAllTest();
     
     return 0;
 }
+
+
+
+
