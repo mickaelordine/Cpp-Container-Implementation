@@ -1573,8 +1573,360 @@ int runAllTest()
 
 namespace QueueTest
 {
-    
+   using namespace MyStl;
+
+   // Helper function to print test results
+   void print_test(const std::string& test_name, bool passed)
+   {
+      std::cout << "[" << (passed ? "PASS" : "FAIL") << "] " << test_name << std::endl;
+   }
+
+   // Test 1: Default constructor and empty queue
+   void test_default_constructor()
+   {
+      Queue<int> q;
+      bool passed = q.empty() && q.size() == 0;
+      print_test("Default Constructor", passed);
+   }
+
+   // Test 2: Push single element
+   void test_push_single()
+   {
+      Queue<int> q;
+      q.push(10);
+      bool passed = q.size() == 1 && !q.empty() && q.front() == 10 && q.back() == 10;
+      print_test("Push Single Element", passed);
+   }
+
+   // Test 3: Push multiple elements
+   void test_push_multiple()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      q.push(30);
+      
+      bool passed = q.size() == 3 && q.front() == 10 && q.back() == 30;
+      print_test("Push Multiple Elements", passed);
+   }
+
+   // Test 4: Pop single element
+   void test_pop_single()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.pop();
+      
+      bool passed = q.empty() && q.size() == 0;
+      print_test("Pop Single Element", passed);
+   }
+
+   // Test 5: Pop multiple elements (FIFO order)
+   void test_pop_fifo_order()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      q.push(30);
+      
+      int first = q.front();
+      q.pop();
+      int second = q.front();
+      q.pop();
+      int third = q.front();
+      q.pop();
+      
+      bool passed = (first == 10) && (second == 20) && (third == 30) && q.empty();
+      print_test("Pop FIFO Order", passed);
+   }
+
+   // Test 6: Front and back
+   void test_front_back()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      q.push(30);
+      
+      bool passed = q.front() == 10 && q.back() == 30;
+      print_test("Front and Back", passed);
+   }
+
+   // Test 7: Front on empty queue (should throw)
+   void test_front_empty_throws()
+   {
+      Queue<int> q;
+      bool passed = false;
+      
+      try {
+         q.front();
+      } catch (const std::out_of_range&) {
+         passed = true;
+      }
+      
+      print_test("Front on Empty Queue Throws", passed);
+   }
+
+   // Test 8: Back on empty queue (should throw)
+   void test_back_empty_throws()
+   {
+      Queue<int> q;
+      bool passed = false;
+      
+      try {
+         q.back();
+      } catch (const std::out_of_range&) {
+         passed = true;
+      }
+      
+      print_test("Back on Empty Queue Throws", passed);
+   }
+
+   // Test 9: Copy constructor
+   void test_copy_constructor()
+   {
+      Queue<int> q1;
+      q1.push(10);
+      q1.push(20);
+      q1.push(30);
+      
+      Queue<int> q2(q1);
+      
+      bool passed = q2.size() == 3 && q2.front() == 10 && 
+                    q2.back() == 30 && q1.size() == 3;
+      print_test("Copy Constructor", passed);
+   }
+
+   // Test 10: Copy assignment
+   void test_copy_assignment()
+   {
+      Queue<int> q1;
+      q1.push(10);
+      q1.push(20);
+      
+      Queue<int> q2;
+      q2 = q1;
+      
+      bool passed = q2.size() == 2 && q2.front() == 10 && q1.size() == 2;
+      print_test("Copy Assignment", passed);
+   }
+
+   // Test 11: Move constructor
+   void test_move_constructor()
+   {
+      Queue<int> q1;
+      q1.push(10);
+      q1.push(20);
+      q1.push(30);
+      
+      Queue<int> q2(std::move(q1));
+      
+      bool passed = q2.size() == 3 && q2.front() == 10 && 
+                    q2.back() == 30 && q1.empty();
+      print_test("Move Constructor", passed);
+   }
+
+   // Test 12: Move assignment
+   void test_move_assignment()
+   {
+      Queue<int> q1;
+      q1.push(10);
+      q1.push(20);
+      
+      Queue<int> q2;
+      q2 = std::move(q1);
+      
+      bool passed = q2.size() == 2 && q2.front() == 10 && q1.empty();
+      print_test("Move Assignment", passed);
+   }
+
+   // Test 13: Swap
+   void test_swap()
+   {
+      Queue<int> q1;
+      q1.push(10);
+      q1.push(20);
+      
+      Queue<int> q2;
+      q2.push(30);
+      q2.push(40);
+      q2.push(50);
+      
+      q1.swap(q2);
+      
+      bool passed = q1.size() == 3 && q1.front() == 30 && 
+                    q2.size() == 2 && q2.front() == 10;
+      print_test("Swap", passed);
+   }
+
+   // Test 14: Push and pop interleaved
+   void test_push_pop_interleaved()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      q.pop();
+      q.push(30);
+      q.pop();
+      q.push(40);
+      
+      bool passed = q.size() == 2 && q.front() == 30 && q.back() == 40;
+      print_test("Push and Pop Interleaved", passed);
+   }
+
+   // Test 15: Large number of operations
+   void test_large_operations()
+   {
+      Queue<int> q;
+      
+      // Push 100 elements
+      for (int i = 0; i < 100; ++i)
+         q.push(i);
+      
+      bool passed = q.size() == 100 && q.front() == 0 && q.back() == 99;
+      
+      // Pop 50 elements
+      for (int i = 0; i < 50; ++i)
+         q.pop();
+      
+      passed = passed && q.size() == 50 && q.front() == 50 && q.back() == 99;
+      
+      print_test("Large Number of Operations", passed);
+   }
+
+   // Test 16: Empty after multiple operations
+   void test_empty_after_operations()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      q.push(30);
+      q.pop();
+      q.pop();
+      q.pop();
+      
+      bool passed = q.empty() && q.size() == 0;
+      print_test("Empty After Multiple Operations", passed);
+   }
+
+   // Test 17: Self assignment
+   void test_self_assignment()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      
+      q = q;
+      
+      bool passed = q.size() == 2 && q.front() == 10;
+      print_test("Self Assignment", passed);
+   }
+
+   // Test 18: Move semantic with rvalue push
+   void test_move_push()
+   {
+      Queue<int> q;
+      int value = 42;
+      q.push(std::move(value));
+      
+      bool passed = q.size() == 1 && q.front() == 42;
+      print_test("Move Push", passed);
+   }
+
+   // Test 19: Const correctness
+   void test_const_correctness()
+   {
+      Queue<int> q;
+      q.push(10);
+      q.push(20);
+      
+      const Queue<int>& cq = q;
+      
+      bool passed = cq.front() == 10 && cq.back() == 20 && 
+                    cq.size() == 2 && !cq.empty();
+      print_test("Const Correctness", passed);
+   }
+
+   // Test 20: Queue with strings
+   void test_with_strings()
+   {
+      Queue<std::string> q;
+      q.push("Hello");
+      q.push("World");
+      q.push("!");
+      
+      bool passed = q.size() == 3 && q.front() == "Hello" && q.back() == "!";
+      
+      q.pop();
+      passed = passed && q.front() == "World";
+      
+      print_test("Queue with Strings", passed);
+   }
+
+   // Test 21: Alternating push/pop until empty
+   void test_alternating_until_empty()
+   {
+      Queue<int> q;
+      
+      for (int i = 0; i < 5; ++i)
+      {
+         q.push(i * 10);
+         if (i > 0)
+            q.pop();
+      }
+       
+      bool passed = q.size() == 1 && q.front() == 40;
+      print_test("Alternating Push/Pop Until Empty", passed);
+   }
+
+   // Test 22: Copy independence
+   void test_copy_independence()
+   {
+      Queue<int> q1;
+      q1.push(10);
+      q1.push(20);
+      
+      Queue<int> q2 = q1;
+      q1.push(30);
+      q2.pop();
+      
+      bool passed = q1.size() == 3 && q2.size() == 1 && 
+                    q1.back() == 30 && q2.front() == 20;
+      print_test("Copy Independence", passed);
+   }
+
+   // Run all tests
+   void run_all_tests()
+   {
+      std::cout << "\n========== Running Queue Tests ==========\n" << std::endl;
+      
+      test_default_constructor();
+      test_push_single();
+      test_push_multiple();
+      test_pop_single();
+      test_pop_fifo_order();
+      test_front_back();
+      test_front_empty_throws();
+      test_back_empty_throws();
+      test_copy_constructor();
+      test_copy_assignment();
+      test_move_constructor();
+      test_move_assignment();
+      test_swap();
+      test_push_pop_interleaved();
+      test_large_operations();
+      test_empty_after_operations();
+      test_self_assignment();
+      test_move_push();
+      test_const_correctness();
+      test_with_strings();
+      test_alternating_until_empty();
+      test_copy_independence();
+      
+      std::cout << "\n========== Queue Tests Complete ==========\n" << std::endl;
+   }
 }
+
 
 int main()
 {
@@ -1582,7 +1934,8 @@ int main()
     //MapTest::runAllTests();
     //DequeTest::runAllTests();
     //SetTest::run_all_tests();
-    StackTest::runAllTest();
+    //StackTest::runAllTest();
+    //QueueTest::run_all_tests();
     
     return 0;
 }

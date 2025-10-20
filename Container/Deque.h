@@ -176,6 +176,14 @@ namespace MyStl
         } // destructor
 
         // access functions //
+        T& operator[](size_t index) const
+        {
+            size_t chunk_index = first_chunk + (first_offset + index) / DEFAULT_CHUNK_SIZE;
+            size_t offset_index = (first_offset + index) % DEFAULT_CHUNK_SIZE;
+            if (chunk_index > last_chunk || (chunk_index == last_chunk && offset_index > last_offset))
+                throw std::out_of_range("Deque::[] - index out of range");
+            return map[chunk_index][offset_index];
+        }
         T& operator[](size_t index)
         {
             size_t chunk_index = first_chunk + (first_offset + index) / DEFAULT_CHUNK_SIZE;
@@ -184,7 +192,16 @@ namespace MyStl
                 throw std::out_of_range("Deque::[] - index out of range");
             return map[chunk_index][offset_index];
         }
+        
         T& at(size_t index)
+        {
+            size_t chunk_index = first_chunk + (first_offset + index) / DEFAULT_CHUNK_SIZE;
+            size_t offset_index = (first_offset + index) % DEFAULT_CHUNK_SIZE;
+            if (chunk_index > last_chunk || (chunk_index == last_chunk && offset_index > last_offset))
+                throw std::out_of_range("Deque::at - index out of range");
+            return map[chunk_index][offset_index];
+        }
+        const T& at(size_t index) const
         {
             size_t chunk_index = first_chunk + (first_offset + index) / DEFAULT_CHUNK_SIZE;
             size_t offset_index = (first_offset + index) % DEFAULT_CHUNK_SIZE;
