@@ -1,6 +1,5 @@
 
 #include <iostream>
-#include <map>
 #include <ostream>
 #include <string>
 #include <iomanip>
@@ -9,6 +8,7 @@
 #include "Deque.h"
 #include "List.h"
 #include "Map.h"
+#include "Set.h"
 
 namespace ListTest
     {
@@ -1129,12 +1129,299 @@ namespace DequeTest
     }
 }
 
+namespace SetTest
+{
+   using namespace MyStl;
+
+   // Helper function to print test results
+   void print_test(const std::string& test_name, bool passed)
+   {
+      std::cout << "[" << (passed ? "PASS" : "FAIL") << "] " << test_name << std::endl;
+   }
+
+   // Test 1: Default constructor and empty set
+   void test_default_constructor()
+   {
+      Set<int> s;
+      bool passed = s.empty() && s.size() == 0;
+      print_test("Default Constructor", passed);
+   }
+
+   // Test 2: Insert single element
+   void test_insert_single()
+   {
+      Set<int> s;
+      s.insert(10);
+      bool passed = s.size() == 1 && !s.empty() && s.contains(10);
+      print_test("Insert Single Element", passed);
+   }
+
+   // Test 3: Insert multiple elements
+   void test_insert_multiple()
+   {
+      Set<int> s;
+      s.insert(10);
+      s.insert(5);
+      s.insert(15);
+      s.insert(3);
+      s.insert(7);
+      
+      bool passed = s.size() == 5 && 
+                    s.contains(10) && s.contains(5) && 
+                    s.contains(15) && s.contains(3) && s.contains(7);
+      print_test("Insert Multiple Elements", passed);
+   }
+
+   // Test 4: Insert duplicate (should not increase size)
+   void test_insert_duplicate()
+   {
+      Set<int> s;
+      s.insert(10);
+      s.insert(10);
+      s.insert(10);
+      
+      bool passed = s.size() == 1 && s.contains(10);
+      print_test("Insert Duplicate", passed);
+   }
+
+   // Test 5: Initializer list constructor
+   void test_initializer_list()
+   {
+      Set<int> s = {10, 5, 15, 3, 7, 12, 17};
+      bool passed = s.size() == 7 && s.contains(10) && s.contains(17);
+      print_test("Initializer List Constructor", passed);
+   }
+
+   // Test 6: Erase leaf node
+   void test_erase_leaf()
+   {
+      Set<int> s = {10, 5, 15, 3, 7};
+      s.erase(3);
+      
+      bool passed = s.size() == 4 && !s.contains(3) && s.contains(5);
+      print_test("Erase Leaf Node", passed);
+   }
+
+   // Test 7: Erase node with one child (left)
+   void test_erase_one_child_left()
+   {
+      Set<int> s = {10, 5, 3};
+      s.erase(5);
+      
+      bool passed = s.size() == 2 && !s.contains(5) && s.contains(3) && s.contains(10);
+      print_test("Erase Node with One Child (Left)", passed);
+   }
+
+   // Test 8: Erase node with one child (right)
+   void test_erase_one_child_right()
+   {
+      Set<int> s = {10, 15, 17};
+      s.erase(15);
+      
+      bool passed = s.size() == 2 && !s.contains(15) && s.contains(17) && s.contains(10);
+      print_test("Erase Node with One Child (Right)", passed);
+   }
+
+   // Test 9: Erase node with two children
+   void test_erase_two_children()
+   {
+      Set<int> s = {10, 5, 15, 3, 7, 12, 17};
+      s.erase(10);
+      
+      bool passed = s.size() == 6 && !s.contains(10) && 
+                    s.contains(5) && s.contains(15) && s.contains(12);
+      print_test("Erase Node with Two Children", passed);
+   }
+
+   // Test 10: Erase root node
+   void test_erase_root()
+   {
+      Set<int> s = {10};
+      s.erase(10);
+      
+      bool passed = s.size() == 0 && s.empty() && !s.contains(10);
+      print_test("Erase Root Node", passed);
+   }
+
+   // Test 11: Erase non-existent element
+   void test_erase_nonexistent()
+   {
+      Set<int> s = {10, 5, 15};
+      s.erase(100);
+      
+      bool passed = s.size() == 3;
+      print_test("Erase Non-existent Element", passed);
+   }
+
+   // Test 12: Clear
+   void test_clear()
+   {
+      Set<int> s = {10, 5, 15, 3, 7, 12, 17};
+      s.clear();
+      
+      bool passed = s.size() == 0 && s.empty();
+      print_test("Clear", passed);
+   }
+
+   // Test 13: Copy constructor
+   void test_copy_constructor()
+   {
+      Set<int> s1 = {10, 5, 15};
+      Set<int> s2(s1);
+      
+      bool passed = s2.size() == 3 && s2.contains(10) && 
+                    s2.contains(5) && s2.contains(15);
+      print_test("Copy Constructor", passed);
+   }
+
+   // Test 14: Copy assignment
+   void test_copy_assignment()
+   {
+      Set<int> s1 = {10, 5, 15};
+      Set<int> s2;
+      s2 = s1;
+      
+      bool passed = s2.size() == 3 && s2.contains(10);
+      print_test("Copy Assignment", passed);
+   }
+
+   // Test 15: Move constructor
+   void test_move_constructor()
+   {
+      Set<int> s1 = {10, 5, 15};
+      Set<int> s2(std::move(s1));
+      
+      bool passed = s2.size() == 3 && s2.contains(10) && s1.size() == 0;
+      print_test("Move Constructor", passed);
+   }
+
+   // Test 16: Move assignment
+   void test_move_assignment()
+   {
+      Set<int> s1 = {10, 5, 15};
+      Set<int> s2;
+      s2 = std::move(s1);
+      
+      bool passed = s2.size() == 3 && s2.contains(10);
+      print_test("Move Assignment", passed);
+   }
+
+   // Test 17: Contains
+   void test_contains()
+   {
+      Set<int> s = {10, 5, 15};
+      bool passed = s.contains(10) && s.contains(5) && 
+                    s.contains(15) && !s.contains(100);
+      print_test("Contains", passed);
+   }
+
+   // Test 18: Count
+   void test_count()
+   {
+      Set<int> s = {10, 5, 15};
+      bool passed = s.count(10) == 1 && s.count(100) == 0;
+      print_test("Count", passed);
+   }
+
+   // Test 19: Lower bound
+   void test_lower_bound()
+   {
+      Set<int> s = {10, 20, 30, 40, 50};
+      bool passed = true;
+      
+      try {
+         passed = passed && (s.lower_bound(25) == 30);
+         passed = passed && (s.lower_bound(30) == 30);
+         passed = passed && (s.lower_bound(10) == 10);
+      } catch (...) {
+         passed = false;
+      }
+      
+      print_test("Lower Bound", passed);
+   }
+
+   // Test 20: Upper bound
+   void test_upper_bound()
+   {
+      Set<int> s = {10, 20, 30, 40, 50};
+      bool passed = true;
+      
+      try {
+         passed = passed && (s.upper_bound(25) == 30);
+         passed = passed && (s.upper_bound(30) == 40);
+         passed = passed && (s.upper_bound(10) == 20);
+      } catch (...) {
+         passed = false;
+      }
+      
+      print_test("Upper Bound", passed);
+   }
+
+   // Test 21: Complex erase sequence
+   void test_complex_erase()
+   {
+      Set<int> s = {50, 30, 70, 20, 40, 60, 80, 10, 25, 35, 65};
+      s.erase(30);
+      s.erase(70);
+      s.erase(50);
+      
+      bool passed = s.size() == 8 && !s.contains(30) && 
+                    !s.contains(70) && !s.contains(50) &&
+                    s.contains(35) && s.contains(60);
+      print_test("Complex Erase Sequence", passed);
+   }
+
+   // Test 22: Insert after clear
+   void test_insert_after_clear()
+   {
+      Set<int> s = {10, 5, 15};
+      s.clear();
+      s.insert(20);
+      s.insert(10);
+      
+      bool passed = s.size() == 2 && s.contains(20) && s.contains(10);
+      print_test("Insert After Clear", passed);
+   }
+
+   // Run all tests
+   void run_all_tests()
+   {
+      std::cout << "\n========== Running Set Tests ==========\n" << std::endl;
+      
+      test_default_constructor();
+      test_insert_single();
+      test_insert_multiple();
+      test_insert_duplicate();
+      test_initializer_list();
+      test_erase_leaf();
+      test_erase_one_child_left();
+      test_erase_one_child_right();
+      test_erase_two_children();
+      test_erase_root();
+      test_erase_nonexistent();
+      test_clear();
+      test_copy_constructor();
+      test_copy_assignment();
+      test_move_constructor();
+      test_move_assignment();
+      test_contains();
+      test_count();
+      test_lower_bound();
+      test_upper_bound();
+      test_complex_erase();
+      test_insert_after_clear();
+      
+      std::cout << "\n========== Tests Complete ==========\n" << std::endl;
+   }
+}
+
 
 int main()
 {
     //ListTest::full_test();
     //MapTest::runAllTests();
     //DequeTest::runAllTests();
+    SetTest::run_all_tests();
     
     return 0;
 }
