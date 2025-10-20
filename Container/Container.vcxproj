@@ -160,6 +160,7 @@
     <ClInclude Include="Deque.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Set.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

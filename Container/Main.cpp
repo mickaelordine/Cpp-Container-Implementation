@@ -1,9 +1,7 @@
 
 #include <iostream>
-#include <list>
 #include <map>
 #include <ostream>
-#include <iostream>
 #include <string>
 #include <iomanip>
 #include <cassert>
@@ -1132,11 +1130,11 @@ namespace DequeTest
 }
 
 
-int main(int argc, char* argv[])
+int main()
 {
     //ListTest::full_test();
     //MapTest::runAllTests();
-    DequeTest::runAllTests();
+    //DequeTest::runAllTests();
     
     return 0;
 }
