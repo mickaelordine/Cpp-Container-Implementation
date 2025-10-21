@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <functional>
 #include <iterator>
+#include <vector>
 
 namespace MyStl {
     
@@ -133,15 +134,65 @@ namespace MyStl {
 
     // merge sort //
     template <typename Iterator, typename Compare = std::less<typename std::iterator_traits<Iterator>::value_type>>
-    void merge(const Iterator& first, const Iterator& last, Compare comp = Compare{})
+    void merge(const Iterator& first, const Iterator& mid, const Iterator& last, Compare comp = Compare{})
     {
-        
+
+        using value_type = typename std::iterator_traits<Iterator>::value_type;
+    
+        // Copia in 2 vector temporanei left e right
+        std::vector<value_type> temp_left(first, mid);
+        std::vector<value_type> temp_right(mid, last);
+    
+        // Usa INDICI per scorrere il vector temporaneo
+        size_t left_idx = 0;
+        size_t left_end = std::distance(first, mid);
+        size_t right_idx = 0;
+        size_t right_end = std::distance(mid, last);
+    
+        // l'iterator ORIGINALE per scrivere nel contenitore
+        Iterator dest = first;
+    
+        // Merge con indici per temp, iterator per destinazione
+        while (left_idx < left_end && right_idx < right_end) {
+            if (comp(temp_left[left_idx], temp_right[right_idx])) {
+                *dest = std::move(temp_left[left_idx]);
+                ++left_idx;
+            } else {
+                *dest = std::move(temp_right[right_idx]);
+                ++right_idx;
+            }
+            ++dest;
+        }
+    
+        // Copia elementi rimanenti
+        while (left_idx < left_end) {
+            *dest = std::move(temp_left[left_idx]);
+            ++left_idx;
+            ++dest;
+        }
+    
+        while (right_idx < right_end) {
+            *dest = std::move(temp_right[right_idx]);
+            ++right_idx;
+            ++dest;
+        }
     }
 
     template <typename Iterator, typename Compare = std::less<typename std::iterator_traits<Iterator>::value_type>>
     void merge_sort(const Iterator& first, const Iterator& last, Compare comp = Compare{})
     {
+        if (std::distance(first, last) <= 1)
+            return;
         
+        Iterator mid  = first + std::distance(first, last) / 2;
+
+        // ricorsivamente ordinare la prima metà
+        merge_sort(first, mid, comp);
+        // ricorsivamente ordinare la seconda metà
+        merge_sort(mid, last,  comp);
+
+        // unire le due metà ordinandole
+        merge(first, mid, last, comp);
     }
 
     // heap sort //
