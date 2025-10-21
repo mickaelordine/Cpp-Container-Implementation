@@ -4,6 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <cassert>
+#include <vector>
 
 #include "Deque.h"
 #include "List.h"
@@ -11,6 +12,7 @@
 #include "Set.h"
 #include "Stack.h"
 #include "Queue.h"
+#include "../Algorithm/Sorting/Algorithm.h"
 
 namespace ListTest
     {
@@ -1927,7 +1929,7 @@ namespace QueueTest
    }
 }
 
-
+#include <algorithm>
 int main()
 {
     // ListTest::full_test();
@@ -1936,6 +1938,7 @@ int main()
     // SetTest::run_all_tests();
     // StackTest::runAllTest();
     // QueueTest::run_all_tests();
+    
     return 0;
 }
 
