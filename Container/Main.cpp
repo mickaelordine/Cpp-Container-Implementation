@@ -1930,13 +1930,12 @@ namespace QueueTest
 
 int main()
 {
-    //ListTest::full_test();
-    //MapTest::runAllTests();
-    //DequeTest::runAllTests();
-    //SetTest::run_all_tests();
-    //StackTest::runAllTest();
-    //QueueTest::run_all_tests();
-    
+    // ListTest::full_test();
+    // MapTest::runAllTests();
+    // DequeTest::runAllTests();
+    // SetTest::run_all_tests();
+    // StackTest::runAllTest();
+    // QueueTest::run_all_tests();
     return 0;
 }
 
