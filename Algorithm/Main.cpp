@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../Container/Deque.h"
+#include "../Container/Optional.h"
 #include "Sorting/Algorithm.h"
 
 #define amount 10
@@ -135,6 +136,48 @@ namespace mergesort_test
     }
 }
 
+namespace optional_test
+{
+    Optional<int> my_obj;
+    Optional<int>* my_obj_ptr{new Optional<int>()};
+    void test_ref()
+    {
+        
+        
+        if (!my_obj.IsSet())
+        {
+            std::cout << "No value set\n";
+        }
+        my_obj = 42;
+        if (my_obj.IsSet())
+        {
+            std::cout << "Value: " << my_obj.GetValue() << "\n";
+        }
+
+        my_obj.reset();
+        if (!my_obj.IsSet())
+        {
+            std::cout << "No value set\n";
+        }
+    }
+    void test_ptr()
+    {
+        
+        
+        if (!my_obj_ptr->IsSet())
+        {
+            std::cout << "No value set\n";
+        }
+        my_obj_ptr = new Optional<int>(42);
+        std::cout << "Value: " << my_obj_ptr->GetValue() << "\n";
+
+        my_obj_ptr->reset();
+        if (!my_obj_ptr->IsSet())
+        {
+            std::cout << "No value set\n";
+        }
+    }
+}
 
 int main()
 {
@@ -142,7 +185,8 @@ int main()
     // quicksort_test::test();
     // insertion_test::test();
     // selection_test::test();
-    mergesort_test::test();
-    
+    //mergesort_test::test();
+    optional_test::test_ptr();
+    optional_test::test_ref();
     return 0;
 }
