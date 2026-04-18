@@ -4,6 +4,7 @@
 
 #include "../Container/Deque.h"
 #include "../Container/Optional.h"
+#include "../Container/Variant.h"
 #include "Sorting/Algorithm.h"
 
 #define amount 10

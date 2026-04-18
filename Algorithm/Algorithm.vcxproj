@@ -19,9 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Searching\" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Sorting\Algorithm.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
